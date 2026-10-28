@@ -8,6 +8,10 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       - name: Checkout du code
         uses: actions/checkout@v3
@@ -17,7 +21,11 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Lowercase repository owner
+        run: |
+          echo "OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - name: Construction et publication de l'image Docker
         uses: docker/build-push-action@v4
@@ -25,5 +33,5 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/uchiwa_v2ray:latest
-            ghcr.io/${{ github.repository_owner }}/uchiwa_v2ray:v1
+            ghcr.io/${{ env.OWNER_LOWER }}/uchiwa_vless:latest
+            ghcr.io/${{ env.OWNER_LOWER }}/uchiwa_vless:v1
